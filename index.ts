@@ -4,7 +4,7 @@ type t<T, A> = {
   desc?: string;
   arg?: A;
   construct: (arg: A, params: T) => Command;
-  args: {
+  flags: {
     [k in keyof T]: {
       short?: string;
       desc: string;
@@ -39,7 +39,7 @@ export class Params {
   parse(strings: string[]) {
     let current = [];
     let mode = this.modes[strings[0]];
-    let args = mode.args;
+    let args = mode.flags;
     let result: { [k: string]: any } = {};
     Object.keys(args).forEach((k: string) => {
       result[k] = args[k].falseVal;
@@ -50,7 +50,7 @@ export class Params {
       if (this.modes[strings[i]]) {
         current.push(mode.construct(arg, result));
         mode = this.modes[strings[i]];
-        args = mode.args;
+        args = mode.flags;
         result = {};
         Object.keys(args).forEach((k: string) => {
           result[k] = args[k].falseVal;
@@ -85,7 +85,7 @@ export class Params {
   printHelp(mode?: string) {
     if (mode) {
       let cmd = this.modes[mode];
-      let options = cmd.args;
+      let options = cmd.flags;
       // Usage part
       let result = `Usage: ${mode}`;
       Object.keys(options).forEach((k) => {

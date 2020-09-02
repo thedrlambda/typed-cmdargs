@@ -23,7 +23,7 @@ Mocha.describe("Simple", () => {
     desc: "Prints help",
     arg: "command",
     construct: (act: string) => new HelpMock(act),
-    args: {},
+    flags: {},
   });
 
   it("Print modes", () => {
@@ -62,7 +62,7 @@ Mocha.describe("Repo", () => {
   params.push("repo", {
     desc: "Setup a new repository",
     construct: (arg: string, params) => new RepoMock(arg, params),
-    args: {
+    flags: {
       private: {
         short: "p",
         desc: "Private repository",
