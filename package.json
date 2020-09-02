@@ -1,0 +1,29 @@
+{
+  "name": "cmdargs",
+  "version": "1.0.0",
+  "description": "Small library for parsing command line arguments",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thedrlambda/cmdargs.git"
+  },
+  "keywords": [
+    "Command",
+    "line",
+    "arguments"
+  ],
+  "author": "Christian Clausen <@thedrlambda>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thedrlambda/cmdargs/issues"
+  },
+  "homepage": "https://github.com/thedrlambda/cmdargs#readme",
+  "devDependencies": {
+    "@types/assert": "^1.5.2",
+    "@types/mocha": "^8.0.3",
+    "mocha": "^8.1.3"
+  }
+}
