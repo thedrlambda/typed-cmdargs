@@ -1,4 +1,6 @@
-export interface Command {}
+export interface Command {
+  execute(): void;
+}
 
 type t<T, A> = {
   desc?: string;
@@ -7,16 +9,16 @@ type t<T, A> = {
   flags: {
     [k in keyof T]: {
       short?: string;
-      desc: string;
-      falseVal: T[k];
+      desc?: string;
+      defaultValue: T[k];
     } & (
       | {
           arg?: undefined;
-          trueVal: T[k];
+          overrideValue: T[k];
         }
       | {
           arg: string;
-          trueVal: (arg: string) => T[k];
+          overrideValue: (arg: string) => T[k];
         }
     );
   };
@@ -30,7 +32,7 @@ function maxKeyWidth(obj: { [key: string]: any }) {
   return width;
 }
 
-export class Params {
+export class ArgumentParser {
   private modes: { [mode: string]: t<any, any> } = {};
   push<T, A>(name: string, mode: t<T, A>) {
     this.modes[name] = mode;
@@ -42,7 +44,7 @@ export class Params {
     let args = mode.flags;
     let result: { [k: string]: any } = {};
     Object.keys(args).forEach((k: string) => {
-      result[k] = args[k].falseVal;
+      result[k] = args[k].defaultValue;
     });
     let arg: undefined | string = undefined;
     for (let i = 1; i < strings.length; i++) {
@@ -53,15 +55,15 @@ export class Params {
         args = mode.flags;
         result = {};
         Object.keys(args).forEach((k: string) => {
-          result[k] = args[k].falseVal;
+          result[k] = args[k].defaultValue;
         });
         arg = undefined;
       } else if (p.startsWith("--")) {
         let k = p.substring("--".length);
         if (args[k].arg) {
-          result[k] = args[k].trueVal(strings[++i]);
+          result[k] = args[k].overrideValue(strings[++i]);
         } else {
-          result[k] = args[k].trueVal;
+          result[k] = args[k].overrideValue;
         }
       } else if (p.startsWith("-")) {
         let ps = p.split("");
@@ -69,9 +71,9 @@ export class Params {
           Object.keys(args).forEach((k: string) => {
             if (ps[j] === args[k].short)
               if (args[k].arg) {
-                result[k] = args[k].trueVal(strings[++i]);
+                result[k] = args[k].overrideValue(strings[++i]);
               } else {
-                result[k] = args[k].trueVal;
+                result[k] = args[k].overrideValue;
               }
           });
         }
@@ -82,7 +84,7 @@ export class Params {
     current.push(mode.construct(arg, result));
     return current;
   }
-  printHelp(mode?: string) {
+  helpString(mode?: string) {
     if (mode) {
       let cmd = this.modes[mode];
       let options = cmd.flags;

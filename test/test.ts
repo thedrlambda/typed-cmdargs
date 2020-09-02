@@ -1,24 +1,29 @@
 import * as Mocha from "mocha";
 import assert from "assert";
-import { Command, Params } from "../index";
+import { Command, ArgumentParser } from "../index";
 
 Mocha.describe("Empty", () => {
-  let params = new Params();
+  let params = new ArgumentParser();
 
   it("Print modes", () => {
     assert.equal(
-      params.printHelp(),
+      params.helpString(),
       "Specify which action you want help with:\n\n"
     );
   });
 });
 
-class HelpMock implements Command {
-  constructor(public readonly action: string) {}
+class DummyCommand implements Command {
+  execute() {}
+}
+class HelpMock extends DummyCommand {
+  constructor(public readonly action: string) {
+    super();
+  }
 }
 
 Mocha.describe("Simple", () => {
-  let params = new Params();
+  let params = new ArgumentParser();
   params.push("help", {
     desc: "Prints help",
     arg: "command",
@@ -28,14 +33,14 @@ Mocha.describe("Simple", () => {
 
   it("Print modes", () => {
     assert.equal(
-      params.printHelp(),
+      params.helpString(),
       "Specify which action you want help with:\n\n\thelp  Prints help\n"
     );
   });
 
   it("Print help for 'help'", () => {
     assert.equal(
-      params.printHelp("help"),
+      params.helpString("help"),
       "Usage: help <command>\nPrints help\n\n"
     );
   });
@@ -46,7 +51,7 @@ Mocha.describe("Simple", () => {
   });
 });
 
-class RepoMock implements Command {
+class RepoMock extends DummyCommand {
   constructor(
     public readonly name: string,
     public readonly params: {
@@ -54,11 +59,13 @@ class RepoMock implements Command {
       ignore: string;
       license: string;
     }
-  ) {}
+  ) {
+    super();
+  }
 }
 
 Mocha.describe("Repo", () => {
-  let params = new Params();
+  let params = new ArgumentParser();
   params.push("repo", {
     desc: "Setup a new repository",
     construct: (arg: string, params) => new RepoMock(arg, params),
@@ -66,21 +73,21 @@ Mocha.describe("Repo", () => {
       private: {
         short: "p",
         desc: "Private repository",
-        trueVal: true,
-        falseVal: false,
+        overrideValue: true,
+        defaultValue: false,
       },
       ignore: {
         short: "i",
         desc: "Fetch standard .gitignore",
         arg: "language",
-        trueVal: (s) => s,
-        falseVal: "",
+        overrideValue: (s) => s,
+        defaultValue: "",
       },
       license: {
         desc: "Fetch standard license",
         arg: "license",
-        trueVal: (s) => s,
-        falseVal: "",
+        overrideValue: (s) => s,
+        defaultValue: "",
       },
     },
   });
