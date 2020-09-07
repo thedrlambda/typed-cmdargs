@@ -1,7 +1,7 @@
 {
   "name": "typed-cmdargs",
-  "version": "1.0.0",
-  "description": "Small library for parsing command line arguments",
+  "version": "1.0.1",
+  "description": "Small library for parsing command line arguments type-safely and with great architecture.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
@@ -18,9 +18,9 @@
   "author": "Christian Clausen <@thedrlambda>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/thedrlambda/cmdargs/issues"
+    "url": "https://github.com/thedrlambda/typed-cmdargs/issues"
   },
-  "homepage": "https://github.com/thedrlambda/cmdargs#readme",
+  "homepage": "https://github.com/thedrlambda/typed-cmdargs#readme",
   "devDependencies": {
     "@types/assert": "^1.5.2",
     "@types/mocha": "^8.0.3",
