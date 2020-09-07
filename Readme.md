@@ -1,24 +1,24 @@
-# cmdargs
+# typed-cmdargs
 
 Small library for parsing command line arguments for `git` style tools. 
 
-The strength is really the type safety and architecture it supports.
+The strength is the type safety and architecture it supports.
 
 ## How to install
 
 ```
-npm install
+npm install typed-cmdargs
 ```
+
+## How to use
+
+For tutorial see my blog post on Medium: [https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403](https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403?sk=31950050bc8f1f36597f384527212214)
 
 ## How to test
 
 ```
 npm test
 ```
-
-## How to use
-
-For tutorial see my blog post on Medium: [LINK]
 
 ## How to contribute
 

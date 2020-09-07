@@ -1,5 +1,5 @@
 {
-  "name": "cmdargs",
+  "name": "typed-cmdargs",
   "version": "1.0.0",
   "description": "Small library for parsing command line arguments",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thedrlambda/cmdargs.git"
+    "url": "git+https://github.com/thedrlambda/typed-cmdargs.git"
   },
   "keywords": [
     "Command",
