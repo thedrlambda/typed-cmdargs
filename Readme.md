@@ -10,6 +10,38 @@ The strength is the type safety and architecture it supports.
 npm install typed-cmdargs
 ```
 
+## Example
+
+```
+let params = new ArgumentParser();
+params.push("repo", {
+  desc: "Setup a new repository",
+  arg: "name",
+  construct: (arg, params) => new Repo(arg, params),
+  flags: {
+    private: {
+      short: "p",
+      desc: "Private repository",
+      overrideValue: true,
+      defaultValue: false,
+    },
+    ignore: {
+      short: "i",
+      desc: "Fetch standard .gitignore",
+      arg: "language",
+      overrideValue: (s) => s,
+      defaultValue: "",
+    },
+    license: {
+      desc: "Fetch standard license",
+      arg: "license",
+      overrideValue: (s) => s,
+      defaultValue: "",
+    },
+  },
+});
+```
+
 ## How to use
 
 For tutorial see my blog post on Medium: [https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403](https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403?sk=31950050bc8f1f36597f384527212214)

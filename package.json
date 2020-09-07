@@ -1,6 +1,6 @@
 {
   "name": "typed-cmdargs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Small library for parsing command line arguments type-safely and with great architecture.",
   "main": "index.js",
   "scripts": {

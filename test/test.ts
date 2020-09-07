@@ -68,7 +68,8 @@ Mocha.describe("Repo", () => {
   let params = new ArgumentParser();
   params.push("repo", {
     desc: "Setup a new repository",
-    construct: (arg: string, params) => new RepoMock(arg, params),
+    arg: "name",
+    construct: (arg, params) => new RepoMock(arg, params),
     flags: {
       private: {
         short: "p",
