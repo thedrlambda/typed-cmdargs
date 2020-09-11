@@ -12,6 +12,34 @@ npm install typed-cmdargs
 
 ## Example
 
+Helper classes:
+
+```
+interface IgnoreAction {
+  act(): void;
+}
+class DownloadIgnore implement IgnoreAction {
+  constructor(private language: string) { }
+  act() { ... }
+}
+class DoNothing implement IgnoreAction {
+  act() { }
+}
+
+class Repo implements Command {
+  constructor(
+    private name: string, 
+    private flags: { private: boolean, ignore: IgnoreAction }) { }
+  execute() { 
+    ...
+    flags.ignore.act();
+    ...
+  }
+}
+```
+
+Configuring the parser:
+
 ```
 let params = new ArgumentParser();
 params.push("repo", {
@@ -29,17 +57,24 @@ params.push("repo", {
       short: "i",
       desc: "Fetch standard .gitignore",
       arg: "language",
-      overrideValue: (s) => s,
-      defaultValue: "",
-    },
-    license: {
-      desc: "Fetch standard license",
-      arg: "license",
-      overrideValue: (s) => s,
-      defaultValue: "",
+      overrideValue: (s) => new DownloadIgnore(s),
+      defaultValue: new DoNothing(),
     },
   },
 });
+```
+
+Template for calling it:
+
+```
+if (process.argv[0].endsWith("node.exe")) process.argv.splice(0, 1);
+process.argv.splice(0, 1);
+if (process.argv[0] === "help") {
+  console.log(argParser.helpString(process.argv[1]));
+} else {
+  let cmds = argParser.parse(process.argv);
+  cmds.forEach((cmd) => cmd.execute());
+}
 ```
 
 ## How to use
