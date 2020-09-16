@@ -2,7 +2,7 @@
 
 Small library for parsing command line arguments for `git` style tools. 
 
-The strength is the type safety and architecture it supports.
+The strength is the type safety and extensible architecture it enables.
 
 ## How to install
 
@@ -12,7 +12,7 @@ npm install typed-cmdargs
 
 ## Example
 
-Helper classes:
+### Helper classes
 
 ```
 interface IgnoreAction {
@@ -38,7 +38,7 @@ class Repo implements Command {
 }
 ```
 
-Configuring the parser:
+### Configuring the parser
 
 ```
 let params = new ArgumentParser();
@@ -64,7 +64,7 @@ params.push("repo", {
 });
 ```
 
-Template for calling it:
+### Template for calling the parser
 
 ```
 if (process.argv[0].endsWith("node.exe")) process.argv.splice(0, 1);
@@ -79,7 +79,7 @@ if (process.argv[0] === "help") {
 
 ## How to use
 
-For tutorial see my blog post on Medium: [https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403](https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403?sk=31950050bc8f1f36597f384527212214)
+For a more thorough tutorial see my blog post on Medium: [https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403](https://medium.com/@thedrlambda/cli-architecture-in-nodejs-852e95773403?sk=31950050bc8f1f36597f384527212214)
 
 ## How to test
 
@@ -89,6 +89,5 @@ npm test
 
 ## How to contribute
 
-Make sure the tests are passing, then just send me a pull request. 
+Make sure the tests are passing and that there are only `dev` dependencies, then just send me a pull request. 
 
-_Notice_: I only want `dev` dependencies.
