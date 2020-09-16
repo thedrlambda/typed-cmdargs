@@ -29,10 +29,13 @@ class DoNothing implement IgnoreAction {
 class Repo implements Command {
   constructor(
     private name: string, 
-    private flags: { private: boolean, ignore: IgnoreAction }) { }
+    private flags: { 
+      private: boolean, 
+      ignore: IgnoreAction 
+    }) { }
   execute() { 
     ...
-    flags.ignore.act();
+    this.flags.ignore.act();
     ...
   }
 }
