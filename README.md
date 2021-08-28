@@ -44,8 +44,8 @@ class Repo implements Command {
 ### Configuring the parser
 
 ```
-let params = new ArgumentParser();
-params.push("repo", {
+let argParser = new ArgumentParser();
+argParser.push("repo", {
   desc: "Setup a new repository",
   arg: "name",
   construct: (arg, params) => new Repo(arg, params),

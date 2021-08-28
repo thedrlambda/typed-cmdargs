@@ -14,7 +14,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -28,11 +28,11 @@ const index_1 = require("../index");
 Mocha.describe("Empty", () => {
     let params = new index_1.ArgumentParser();
     it("Print modes", () => {
-        assert_1.default.equal(params.helpString(), "Specify which action you want help with:\n\n");
+        assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n");
     });
 });
 class DummyCommand {
-    execute() { }
+    async execute() { }
 }
 class HelpMock extends DummyCommand {
     constructor(action) {
@@ -49,14 +49,14 @@ Mocha.describe("Simple", () => {
         flags: {},
     });
     it("Print modes", () => {
-        assert_1.default.equal(params.helpString(), "Specify which action you want help with:\n\n\thelp  Prints help\n");
+        assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n\thelp  Prints help\n");
     });
     it("Print help for 'help'", () => {
-        assert_1.default.equal(params.helpString("help"), "Usage: help <command>\nPrints help\n\n");
+        assert_1.default.strictEqual(params.helpString("help"), "Usage: help <command>\nPrints help\n\n");
     });
     it("'help'", () => {
         let res = params.parse(["help"])[0];
-        assert_1.default.equal(res.action, undefined);
+        assert_1.default.strictEqual(res.action, undefined);
     });
 });
 class RepoMock extends DummyCommand {
@@ -70,6 +70,7 @@ Mocha.describe("Repo", () => {
     let params = new index_1.ArgumentParser();
     params.push("repo", {
         desc: "Setup a new repository",
+        arg: "name",
         construct: (arg, params) => new RepoMock(arg, params),
         flags: {
             private: {
@@ -95,18 +96,30 @@ Mocha.describe("Repo", () => {
     });
     it("Argument", () => {
         let res = params.parse(["repo", "five-lines"])[0];
-        assert_1.default.equal(res.name, "five-lines");
-        assert_1.default.deepEqual(res.params, { private: false, ignore: "", license: "" });
+        assert_1.default.strictEqual(res.name, "five-lines");
+        assert_1.default.deepStrictEqual(res.params, {
+            private: false,
+            ignore: "",
+            license: "",
+        });
     });
     it("Short flag", () => {
         let res = params.parse(["repo", "-p", "five-lines"])[0];
-        assert_1.default.equal(res.name, "five-lines");
-        assert_1.default.deepEqual(res.params, { private: true, ignore: "", license: "" });
+        assert_1.default.strictEqual(res.name, "five-lines");
+        assert_1.default.deepStrictEqual(res.params, {
+            private: true,
+            ignore: "",
+            license: "",
+        });
     });
     it("Long flag", () => {
         let res = params.parse(["repo", "--private", "five-lines"])[0];
-        assert_1.default.equal(res.name, "five-lines");
-        assert_1.default.deepEqual(res.params, { private: true, ignore: "", license: "" });
+        assert_1.default.strictEqual(res.name, "five-lines");
+        assert_1.default.deepStrictEqual(res.params, {
+            private: true,
+            ignore: "",
+            license: "",
+        });
     });
     it("Short flag with argument", () => {
         let res = params.parse([
@@ -115,8 +128,8 @@ Mocha.describe("Repo", () => {
             "javascript",
             "five-lines",
         ])[0];
-        assert_1.default.equal(res.name, "five-lines");
-        assert_1.default.deepEqual(res.params, {
+        assert_1.default.strictEqual(res.name, "five-lines");
+        assert_1.default.deepStrictEqual(res.params, {
             private: false,
             ignore: "javascript",
             license: "",
@@ -129,8 +142,8 @@ Mocha.describe("Repo", () => {
             "javascript",
             "five-lines",
         ])[0];
-        assert_1.default.equal(res.name, "five-lines");
-        assert_1.default.deepEqual(res.params, {
+        assert_1.default.strictEqual(res.name, "five-lines");
+        assert_1.default.deepStrictEqual(res.params, {
             private: false,
             ignore: "javascript",
             license: "",
@@ -143,8 +156,8 @@ Mocha.describe("Repo", () => {
             "javascript",
             "five-lines",
         ])[0];
-        assert_1.default.equal(res.name, "five-lines");
-        assert_1.default.deepEqual(res.params, {
+        assert_1.default.strictEqual(res.name, "five-lines");
+        assert_1.default.deepStrictEqual(res.params, {
             private: true,
             ignore: "javascript",
             license: "",
@@ -152,8 +165,8 @@ Mocha.describe("Repo", () => {
     });
     it("Chaining modes without arguments", () => {
         let res = params.parse(["repo", "five-lines", "repo", "fib"]);
-        assert_1.default.equal(res[0].name, "five-lines");
-        assert_1.default.equal(res[1].name, "fib");
+        assert_1.default.strictEqual(res[0].name, "five-lines");
+        assert_1.default.strictEqual(res[1].name, "fib");
     });
     it("Chaining modes with argument", () => {
         let res = params.parse([
@@ -163,14 +176,14 @@ Mocha.describe("Repo", () => {
             "repo",
             "fib",
         ]);
-        assert_1.default.equal(res[0].name, "five-lines");
-        assert_1.default.deepEqual(res[0].params, {
+        assert_1.default.strictEqual(res[0].name, "five-lines");
+        assert_1.default.deepStrictEqual(res[0].params, {
             private: true,
             ignore: "",
             license: "",
         });
-        assert_1.default.equal(res[1].name, "fib");
-        assert_1.default.deepEqual(res[1].params, {
+        assert_1.default.strictEqual(res[1].name, "fib");
+        assert_1.default.deepStrictEqual(res[1].params, {
             private: false,
             ignore: "",
             license: "",

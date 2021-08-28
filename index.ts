@@ -1,5 +1,5 @@
 export interface Command {
-  execute(): void;
+  execute(): Promise<void>;
 }
 
 type t<T, A> = {
