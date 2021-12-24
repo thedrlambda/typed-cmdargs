@@ -41,6 +41,9 @@ export class ArgumentParser {
   parse(strings: string[]) {
     let current = [];
     let mode = this.modes[strings[0]];
+    if (mode === undefined) {
+      throw `Unknown command '${strings[0]}'.`;
+    }
     let args = mode.flags;
     let result: { [k: string]: any } = {};
     Object.keys(args).forEach((k: string) => {
