@@ -16,8 +16,8 @@ Mocha.describe("Empty", () => {
 class DummyCommand implements Command {
   async execute() {}
 }
-class HelpMock extends DummyCommand {
-  constructor(public readonly action: string) {
+class HelpMock<T> extends DummyCommand {
+  constructor(public readonly arg: string, public readonly params: T) {
     super();
   }
 }
@@ -27,7 +27,7 @@ Mocha.describe("Simple", () => {
   params.push("help", {
     desc: "Prints help",
     arg: "command",
-    construct: (act: string) => new HelpMock(act),
+    construct: (act) => new HelpMock(act, undefined),
     flags: {},
   });
 
@@ -46,8 +46,8 @@ Mocha.describe("Simple", () => {
   });
 
   it("'help'", () => {
-    let res = params.parse(["help"])[0] as HelpMock;
-    assert.strictEqual(res.action, undefined);
+    let res = params.parse(["help"])[0] as HelpMock<undefined>;
+    assert.strictEqual(res.arg, undefined);
   });
 });
 
@@ -91,6 +91,26 @@ Mocha.describe("Repo", () => {
         defaultValue: "",
       },
     },
+  });
+
+  it("Help string", () => {
+    let res = params.helpString();
+    assert.strictEqual(
+      res,
+      `Specify which action you want help with:\n\n\trepo  Setup a new repository\n`
+    );
+  });
+
+  it("Print help for 'repo'", () => {
+    assert.strictEqual(
+      params.helpString("repo"),
+      "Usage: repo [--private] [--ignore <language>] [--license <license>] <name>\n" +
+        "Setup a new repository\n" +
+        "\n" +
+        "  -p\t--private  Private repository\n" +
+        "  -i\t--ignore   Fetch standard .gitignore\n" +
+        "  \t--license  Fetch standard license\n"
+    );
   });
 
   it("Argument", () => {
@@ -194,5 +214,50 @@ Mocha.describe("Repo", () => {
       ignore: "",
       license: "",
     });
+  });
+});
+
+Mocha.describe("Required param", () => {
+  let params = new ArgumentParser();
+  params.push("key", {
+    desc: "key-value",
+    arg: "key",
+    construct: (act, params) => new HelpMock(act, params),
+    flags: {
+      val: {
+        short: "v",
+        arg: "value",
+        overrideValue: (s) => s,
+      },
+      optinal: {
+        defaultValue: "optional",
+      },
+    },
+  });
+
+  it("Print modes", () => {
+    assert.strictEqual(
+      params.helpString(),
+      "Specify which action you want help with:\n\n\tkey  key-value\n"
+    );
+  });
+
+  it("Print help for 'key'", () => {
+    assert.strictEqual(
+      params.helpString("key"),
+      "Usage: key --val <value> [--optinal] <key>\n" +
+        "key-value\n" +
+        "\n" +
+        "  -v\t--val      \n" +
+        "  \t--optinal  \n"
+    );
+  });
+
+  it("'key'", () => {
+    let res = params.parse(["key", "thekey", "-v", "theval"])[0] as HelpMock<{
+      val: string;
+    }>;
+    assert.strictEqual(res.arg, "thekey");
+    assert.strictEqual(res.params.val, "theval");
   });
 });

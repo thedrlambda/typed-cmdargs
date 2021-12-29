@@ -24,25 +24,43 @@ class ArgumentParser {
         }
         let args = mode.flags;
         let result = {};
+        let required = new Set();
         Object.keys(args).forEach((k) => {
-            result[k] = args[k].defaultValue;
+            if (args[k].defaultValue === undefined)
+                required.add(k);
+            else
+                result[k] = args[k].defaultValue;
         });
         let arg = undefined;
         for (let i = 1; i < strings.length; i++) {
             let p = strings[i];
             if (this.modes[strings[i]]) {
+                if (required.size > 0) {
+                    let out = "";
+                    required.forEach((k) => {
+                        if (out.length > 0)
+                            out += ", ";
+                        out += k;
+                    });
+                    throw `Missing required arguments: ${out}`;
+                }
                 current.push(mode.construct(arg, result));
                 mode = this.modes[strings[i]];
                 args = mode.flags;
                 result = {};
+                required.clear();
                 Object.keys(args).forEach((k) => {
-                    result[k] = args[k].defaultValue;
+                    if (args[k].defaultValue === undefined)
+                        required.add(k);
+                    else
+                        result[k] = args[k].defaultValue;
                 });
                 arg = undefined;
             }
             else if (p.startsWith("--")) {
                 let k = p.substring("--".length);
-                if (args[k].arg) {
+                required.delete(k);
+                if (args[k].arg !== undefined) {
                     result[k] = args[k].overrideValue(strings[++i]);
                 }
                 else {
@@ -53,13 +71,15 @@ class ArgumentParser {
                 let ps = p.split("");
                 for (let j = 1; j < ps.length; j++) {
                     Object.keys(args).forEach((k) => {
-                        if (ps[j] === args[k].short)
+                        if (ps[j] === args[k].short) {
+                            required.delete(k);
                             if (args[k].arg) {
                                 result[k] = args[k].overrideValue(strings[++i]);
                             }
                             else {
                                 result[k] = args[k].overrideValue;
                             }
+                        }
                     });
                 }
             }
@@ -67,18 +87,34 @@ class ArgumentParser {
                 arg = strings[i];
             }
         }
+        if (required.size > 0) {
+            let out = "";
+            required.forEach((k) => {
+                if (out.length > 0)
+                    out += ", ";
+                out += k;
+            });
+            throw `Missing required arguments: ${out}`;
+        }
         current.push(mode.construct(arg, result));
         return current;
     }
     helpString(mode) {
-        if (mode) {
+        if (mode && this.modes[mode] !== undefined) {
             let cmd = this.modes[mode];
             let options = cmd.flags;
             // Usage part
             let result = `Usage: ${mode}`;
+            let optional = ``;
+            let required = ``;
             Object.keys(options).forEach((k) => {
-                result += ` [--${k}${options[k].arg ? ` <${options[k].arg}>` : ""}]`;
+                if (options[k].defaultValue === undefined)
+                    required += ` --${k}${options[k].arg ? ` <${options[k].arg}>` : ""}`;
+                else
+                    optional += ` [--${k}${options[k].arg ? ` <${options[k].arg}>` : ""}]`;
             });
+            result += required;
+            result += optional;
             result += cmd.arg ? ` <${cmd.arg}>` : "";
             result += "\n";
             // Description part
@@ -88,7 +124,7 @@ class ArgumentParser {
             // Arguments part
             let width = maxKeyWidth(options);
             Object.keys(options).forEach((k) => {
-                result += `  ${options[k].short ? `-${options[k].short}` : ""}\t${`--${k}`.padEnd(width + 4)}${options[k].desc}\n`;
+                result += `  ${options[k].short ? `-${options[k].short}` : ""}\t${`--${k}`.padEnd(width + 4)}${options[k].desc || ""}\n`;
             });
             return result;
         }

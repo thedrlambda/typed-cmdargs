@@ -10,14 +10,20 @@ type t<T, A> = {
     [k in keyof T]: {
       short?: string;
       desc?: string;
-      defaultValue: T[k];
     } & (
       | {
           arg?: undefined;
+          defaultValue: T[k];
+          overrideValue?: undefined;
+        }
+      | {
+          arg?: undefined;
+          defaultValue: T[k];
           overrideValue: T[k];
         }
       | {
           arg: string;
+          defaultValue?: T[k];
           overrideValue: (arg: string) => T[k];
         }
     );
@@ -46,24 +52,37 @@ export class ArgumentParser {
     }
     let args = mode.flags;
     let result: { [k: string]: any } = {};
+    let required = new Set<string>();
     Object.keys(args).forEach((k: string) => {
-      result[k] = args[k].defaultValue;
+      if (args[k].defaultValue === undefined) required.add(k);
+      else result[k] = args[k].defaultValue;
     });
     let arg: undefined | string = undefined;
     for (let i = 1; i < strings.length; i++) {
       let p = strings[i];
       if (this.modes[strings[i]]) {
+        if (required.size > 0) {
+          let out = "";
+          required.forEach((k) => {
+            if (out.length > 0) out += ", ";
+            out += k;
+          });
+          throw `Missing required arguments: ${out}`;
+        }
         current.push(mode.construct(arg, result));
         mode = this.modes[strings[i]];
         args = mode.flags;
         result = {};
+        required.clear();
         Object.keys(args).forEach((k: string) => {
-          result[k] = args[k].defaultValue;
+          if (args[k].defaultValue === undefined) required.add(k);
+          else result[k] = args[k].defaultValue;
         });
         arg = undefined;
       } else if (p.startsWith("--")) {
         let k = p.substring("--".length);
-        if (args[k].arg) {
+        required.delete(k);
+        if (args[k].arg !== undefined) {
           result[k] = args[k].overrideValue(strings[++i]);
         } else {
           result[k] = args[k].overrideValue;
@@ -72,30 +91,49 @@ export class ArgumentParser {
         let ps = p.split("");
         for (let j = 1; j < ps.length; j++) {
           Object.keys(args).forEach((k: string) => {
-            if (ps[j] === args[k].short)
+            if (ps[j] === args[k].short) {
+              required.delete(k);
               if (args[k].arg) {
                 result[k] = args[k].overrideValue(strings[++i]);
               } else {
                 result[k] = args[k].overrideValue;
               }
+            }
           });
         }
       } else {
         arg = strings[i];
       }
     }
+    if (required.size > 0) {
+      let out = "";
+      required.forEach((k) => {
+        if (out.length > 0) out += ", ";
+        out += k;
+      });
+      throw `Missing required arguments: ${out}`;
+    }
     current.push(mode.construct(arg, result));
     return current;
   }
   helpString(mode?: string) {
-    if (mode) {
+    if (mode && this.modes[mode] !== undefined) {
       let cmd = this.modes[mode];
       let options = cmd.flags;
       // Usage part
       let result = `Usage: ${mode}`;
+      let optional = ``;
+      let required = ``;
       Object.keys(options).forEach((k) => {
-        result += ` [--${k}${options[k].arg ? ` <${options[k].arg}>` : ""}]`;
+        if (options[k].defaultValue === undefined)
+          required += ` --${k}${options[k].arg ? ` <${options[k].arg}>` : ""}`;
+        else
+          optional += ` [--${k}${
+            options[k].arg ? ` <${options[k].arg}>` : ""
+          }]`;
       });
+      result += required;
+      result += optional;
       result += cmd.arg ? ` <${cmd.arg}>` : "";
       result += "\n";
       // Description part
@@ -106,7 +144,7 @@ export class ArgumentParser {
       Object.keys(options).forEach((k) => {
         result += `  ${
           options[k].short ? `-${options[k].short}` : ""
-        }\t${`--${k}`.padEnd(width + 4)}${options[k].desc}\n`;
+        }\t${`--${k}`.padEnd(width + 4)}${options[k].desc || ""}\n`;
       });
       return result;
     } else {
