@@ -14,16 +14,16 @@ type t<T, A> = {
       | {
           arg?: undefined;
           defaultValue: T[k];
-          overrideValue?: undefined;
-        }
-      | {
-          arg?: undefined;
-          defaultValue: T[k];
           overrideValue: T[k];
         }
       | {
           arg: string;
-          defaultValue?: T[k];
+          defaultValue: T[k];
+          overrideValue: (arg: string) => T[k];
+        }
+      | {
+          arg: string;
+          defaultValue?: undefined;
           overrideValue: (arg: string) => T[k];
         }
     );

@@ -222,15 +222,17 @@ Mocha.describe("Required param", () => {
   params.push("key", {
     desc: "key-value",
     arg: "key",
-    construct: (act, params) => new HelpMock(act, params),
+    construct: (act, params: { val: string; optional: string }) =>
+      new HelpMock<{ val: string }>(act, params),
     flags: {
       val: {
         short: "v",
         arg: "value",
         overrideValue: (s) => s,
       },
-      optinal: {
-        defaultValue: "optional",
+      optional: {
+        defaultValue: "nowhere",
+        overrideValue: "here",
       },
     },
   });
