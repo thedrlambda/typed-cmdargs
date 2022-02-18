@@ -215,8 +215,9 @@ Mocha.describe("Required param", () => {
                 arg: "value",
                 overrideValue: (s) => s,
             },
-            optinal: {
-                defaultValue: "optional",
+            optional: {
+                defaultValue: "nowhere",
+                overrideValue: "here",
             },
         },
     });
@@ -224,11 +225,11 @@ Mocha.describe("Required param", () => {
         assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n\tkey  key-value\n");
     });
     it("Print help for 'key'", () => {
-        assert_1.default.strictEqual(params.helpString("key"), "Usage: key --val <value> [--optinal] <key>\n" +
+        assert_1.default.strictEqual(params.helpString("key"), "Usage: key --val <value> [--optional] <key>\n" +
             "key-value\n" +
             "\n" +
-            "  -v\t--val      \n" +
-            "  \t--optinal  \n");
+            "  -v\t--val       \n" +
+            "  \t--optional  \n");
     });
     it("'key'", () => {
         let res = params.parse(["key", "thekey", "-v", "theval"])[0];

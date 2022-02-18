@@ -83,7 +83,7 @@ class ArgumentParser {
                     });
                 }
             }
-            else {
+            else if (p.length > 0) {
                 arg = strings[i];
             }
         }

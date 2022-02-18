@@ -247,11 +247,11 @@ Mocha.describe("Required param", () => {
   it("Print help for 'key'", () => {
     assert.strictEqual(
       params.helpString("key"),
-      "Usage: key --val <value> [--optinal] <key>\n" +
+      "Usage: key --val <value> [--optional] <key>\n" +
         "key-value\n" +
         "\n" +
-        "  -v\t--val      \n" +
-        "  \t--optinal  \n"
+        "  -v\t--val       \n" +
+        "  \t--optional  \n"
     );
   });
 
