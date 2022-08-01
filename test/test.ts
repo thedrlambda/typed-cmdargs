@@ -44,11 +44,6 @@ Mocha.describe("Simple", () => {
       "Usage: help <command>\nPrints help\n\n"
     );
   });
-
-  it("'help'", () => {
-    let res = params.parse(["help"])[0] as HelpMock<undefined>;
-    assert.strictEqual(res.arg, undefined);
-  });
 });
 
 class RepoMock extends DummyCommand {
@@ -110,6 +105,13 @@ Mocha.describe("Repo", () => {
         "  -p\t--private  Private repository\n" +
         "  -i\t--ignore   Fetch standard .gitignore\n" +
         "  \t--license  Fetch standard license\n"
+    );
+  });
+
+  it("No argument", () => {
+    assert.throws(
+      () => params.parse(["repo"]),
+      /^Missing required arguments: name$/
     );
   });
 
@@ -261,5 +263,19 @@ Mocha.describe("Required param", () => {
     }>;
     assert.strictEqual(res.arg, "thekey");
     assert.strictEqual(res.params.val, "theval");
+  });
+
+  it("Missing 'val'", () => {
+    assert.throws(
+      () => params.parse(["key", "thekey"]),
+      /^Missing required arguments: val$/
+    );
+  });
+
+  it("Missing 'value'", () => {
+    assert.throws(
+      () => params.parse(["key", "thekey", "-v"]),
+      /^Missing required arguments: value$/
+    );
   });
 });

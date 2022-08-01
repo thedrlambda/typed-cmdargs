@@ -69,6 +69,8 @@ export class ArgumentParser {
           });
           throw `Missing required arguments: ${out}`;
         }
+        if (arg === undefined && mode.arg !== undefined)
+          throw `Missing required arguments: ${mode.arg}`;
         current.push(mode.construct(arg, result));
         mode = this.modes[strings[i]];
         args = mode.flags;
@@ -82,8 +84,10 @@ export class ArgumentParser {
       } else if (p.startsWith("--")) {
         let k = p.substring("--".length);
         required.delete(k);
-        if (args[k].arg !== undefined) {
-          result[k] = args[k].overrideValue(strings[++i]);
+        let argName = args[k].arg;
+        if (argName !== undefined) {
+          if (i + 1 >= strings.length) required.add(argName);
+          else result[k] = args[k].overrideValue(strings[++i]);
         } else {
           result[k] = args[k].overrideValue;
         }
@@ -93,8 +97,10 @@ export class ArgumentParser {
           Object.keys(args).forEach((k: string) => {
             if (ps[j] === args[k].short) {
               required.delete(k);
-              if (args[k].arg) {
-                result[k] = args[k].overrideValue(strings[++i]);
+              let argName = args[k].arg;
+              if (argName !== undefined) {
+                if (i + 1 >= strings.length) required.add(argName);
+                else result[k] = args[k].overrideValue(strings[++i]);
               } else {
                 result[k] = args[k].overrideValue;
               }
@@ -113,6 +119,8 @@ export class ArgumentParser {
       });
       throw `Missing required arguments: ${out}`;
     }
+    if (arg === undefined && mode.arg !== undefined)
+      throw `Missing required arguments: ${mode.arg}`;
     current.push(mode.construct(arg, result));
     return current;
   }
