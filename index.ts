@@ -38,17 +38,28 @@ function maxKeyWidth(obj: { [key: string]: any }) {
   return width;
 }
 
+export interface HelpArgumentText {
+  help(command: string): string;
+}
+export class NoHelp implements HelpArgumentText {
+  help(command: string) {
+    return `Unknown argument: help`;
+  }
+}
+
 export class ArgumentParser {
   private modes: { [mode: string]: t<any, any> } = {};
+  constructor(private helpArgument: HelpArgumentText) {}
   push<T, A>(name: string, mode: t<T, A>) {
     this.modes[name] = mode;
     return this;
   }
   parse(strings: string[]) {
     let current = [];
-    let mode = this.modes[strings[0]];
+    let command = strings[0];
+    let mode = this.modes[command];
     if (mode === undefined) {
-      throw `Unknown command '${strings[0]}'.`;
+      throw `Unknown command '${command}'.`;
     }
     let args = mode.flags;
     let result: { [k: string]: any } = {};
@@ -84,12 +95,20 @@ export class ArgumentParser {
       } else if (p.startsWith("--")) {
         let k = p.substring("--".length);
         required.delete(k);
-        let argName = args[k].arg;
-        if (argName !== undefined) {
-          if (i + 1 >= strings.length) required.add(argName);
-          else result[k] = args[k].overrideValue(strings[++i]);
+        if (args[k] === undefined) {
+          if (k === "help") {
+            throw this.helpArgument.help(command);
+          } else {
+            throw `Unknown argument: ${k}`;
+          }
         } else {
-          result[k] = args[k].overrideValue;
+          let argName = args[k].arg;
+          if (argName !== undefined) {
+            if (i + 1 >= strings.length) required.add(argName);
+            else result[k] = args[k].overrideValue(strings[++i]);
+          } else {
+            result[k] = args[k].overrideValue;
+          }
         }
       } else if (p.startsWith("-")) {
         let ps = p.split("");

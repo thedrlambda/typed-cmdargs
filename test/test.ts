@@ -1,9 +1,9 @@
 import * as Mocha from "mocha";
 import assert from "assert";
-import { Command, ArgumentParser } from "../index";
+import { Command, ArgumentParser, NoHelp } from "../index";
 
 Mocha.describe("Empty", () => {
-  let params = new ArgumentParser();
+  let params = new ArgumentParser(new NoHelp());
 
   it("Print modes", () => {
     assert.strictEqual(
@@ -23,7 +23,7 @@ class HelpMock<T> extends DummyCommand {
 }
 
 Mocha.describe("Simple", () => {
-  let params = new ArgumentParser();
+  let params = new ArgumentParser(new NoHelp());
   params.push("help", {
     desc: "Prints help",
     arg: "command",
@@ -60,7 +60,7 @@ class RepoMock extends DummyCommand {
 }
 
 Mocha.describe("Repo", () => {
-  let params = new ArgumentParser();
+  let params = new ArgumentParser(new NoHelp());
   params.push("repo", {
     desc: "Setup a new repository",
     arg: "name",
@@ -220,7 +220,7 @@ Mocha.describe("Repo", () => {
 });
 
 Mocha.describe("Required param", () => {
-  let params = new ArgumentParser();
+  let params = new ArgumentParser(new NoHelp());
   params.push("key", {
     desc: "key-value",
     arg: "key",

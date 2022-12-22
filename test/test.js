@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -26,7 +30,7 @@ const Mocha = __importStar(require("mocha"));
 const assert_1 = __importDefault(require("assert"));
 const index_1 = require("../index");
 Mocha.describe("Empty", () => {
-    let params = new index_1.ArgumentParser();
+    let params = new index_1.ArgumentParser(new index_1.NoHelp());
     it("Print modes", () => {
         assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n");
     });
@@ -42,7 +46,7 @@ class HelpMock extends DummyCommand {
     }
 }
 Mocha.describe("Simple", () => {
-    let params = new index_1.ArgumentParser();
+    let params = new index_1.ArgumentParser(new index_1.NoHelp());
     params.push("help", {
         desc: "Prints help",
         arg: "command",
@@ -64,7 +68,7 @@ class RepoMock extends DummyCommand {
     }
 }
 Mocha.describe("Repo", () => {
-    let params = new index_1.ArgumentParser();
+    let params = new index_1.ArgumentParser(new index_1.NoHelp());
     params.push("repo", {
         desc: "Setup a new repository",
         arg: "name",
@@ -203,7 +207,7 @@ Mocha.describe("Repo", () => {
     });
 });
 Mocha.describe("Required param", () => {
-    let params = new index_1.ArgumentParser();
+    let params = new index_1.ArgumentParser(new index_1.NoHelp());
     params.push("key", {
         desc: "key-value",
         arg: "key",

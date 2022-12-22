@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ArgumentParser = void 0;
+exports.ArgumentParser = exports.NoHelp = void 0;
 function maxKeyWidth(obj) {
     let width = 0;
     Object.keys(obj).forEach((k) => {
@@ -8,8 +8,15 @@ function maxKeyWidth(obj) {
     });
     return width;
 }
+class NoHelp {
+    help(command) {
+        return `Unknown argument: help`;
+    }
+}
+exports.NoHelp = NoHelp;
 class ArgumentParser {
-    constructor() {
+    constructor(helpArgument) {
+        this.helpArgument = helpArgument;
         this.modes = {};
     }
     push(name, mode) {
@@ -18,9 +25,10 @@ class ArgumentParser {
     }
     parse(strings) {
         let current = [];
-        let mode = this.modes[strings[0]];
+        let command = strings[0];
+        let mode = this.modes[command];
         if (mode === undefined) {
-            throw `Unknown command '${strings[0]}'.`;
+            throw `Unknown command '${command}'.`;
         }
         let args = mode.flags;
         let result = {};
@@ -62,15 +70,25 @@ class ArgumentParser {
             else if (p.startsWith("--")) {
                 let k = p.substring("--".length);
                 required.delete(k);
-                let argName = args[k].arg;
-                if (argName !== undefined) {
-                    if (i + 1 >= strings.length)
-                        required.add(argName);
-                    else
-                        result[k] = args[k].overrideValue(strings[++i]);
+                if (args[k] === undefined) {
+                    if (k === "help") {
+                        throw this.helpArgument.help(command);
+                    }
+                    else {
+                        throw `Unknown argument: ${k}`;
+                    }
                 }
                 else {
-                    result[k] = args[k].overrideValue;
+                    let argName = args[k].arg;
+                    if (argName !== undefined) {
+                        if (i + 1 >= strings.length)
+                            required.add(argName);
+                        else
+                            result[k] = args[k].overrideValue(strings[++i]);
+                    }
+                    else {
+                        result[k] = args[k].overrideValue;
+                    }
                 }
             }
             else if (p.startsWith("-")) {
