@@ -6,6 +6,7 @@ type t<T, A> = {
   desc?: string;
   arg?: A;
   construct: (arg: A, params: T) => Command;
+  isRelevant?: () => boolean;
   flags: {
     [k in keyof T]: {
       short?: string;
@@ -47,9 +48,21 @@ export class NoHelp implements HelpArgumentText {
   }
 }
 
+export interface ContextHelpText {
+  toString(): string;
+}
+export class NoContextHelp implements ContextHelpText {
+  toString() {
+    return ``;
+  }
+}
+
 export class ArgumentParser {
   private modes: { [mode: string]: t<any, any> } = {};
-  constructor(private helpArgument: HelpArgumentText) {}
+  constructor(
+    private helpArgument: HelpArgumentText,
+    private contextHelp: ContextHelpText
+  ) {}
   push<T, A>(name: string, mode: t<T, A>) {
     this.modes[name] = mode;
     return this;
@@ -178,10 +191,20 @@ export class ArgumentParser {
       let result = "Specify which action you want help with:\n";
       result += "\n";
       let width = maxKeyWidth(this.modes);
-      Object.keys(this.modes).forEach((m) => {
-        result += `\t${m.padEnd(width + 2)}${this.modes[m].desc}\n`;
-      });
-      return result;
+      let lessRelevant = "";
+      Object.keys(this.modes)
+        .sort()
+        .forEach((m) => {
+          let r = this.modes[m].isRelevant;
+          if (r === undefined || r())
+            result += `    ${m.padEnd(width + 2)}${this.modes[m].desc}\n`;
+          else
+            lessRelevant += `    ${m.padEnd(width + 2)}${this.modes[m].desc}\n`;
+        });
+      if (lessRelevant !== "")
+        result +=
+          "\nActions that are probably less relevant:\n\n" + lessRelevant;
+      return result + this.contextHelp.toString();
     }
   }
 }

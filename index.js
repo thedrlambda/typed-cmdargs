@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ArgumentParser = exports.NoHelp = void 0;
+exports.ArgumentParser = exports.NoContextHelp = exports.NoHelp = void 0;
 function maxKeyWidth(obj) {
     let width = 0;
     Object.keys(obj).forEach((k) => {
@@ -14,9 +14,16 @@ class NoHelp {
     }
 }
 exports.NoHelp = NoHelp;
+class NoContextHelp {
+    toString() {
+        return ``;
+    }
+}
+exports.NoContextHelp = NoContextHelp;
 class ArgumentParser {
-    constructor(helpArgument) {
+    constructor(helpArgument, contextHelp) {
         this.helpArgument = helpArgument;
+        this.contextHelp = contextHelp;
         this.modes = {};
     }
     push(name, mode) {
@@ -162,10 +169,20 @@ class ArgumentParser {
             let result = "Specify which action you want help with:\n";
             result += "\n";
             let width = maxKeyWidth(this.modes);
-            Object.keys(this.modes).forEach((m) => {
-                result += `\t${m.padEnd(width + 2)}${this.modes[m].desc}\n`;
+            let lessRelevant = "";
+            Object.keys(this.modes)
+                .sort()
+                .forEach((m) => {
+                let r = this.modes[m].isRelevant;
+                if (r === undefined || r())
+                    result += `    ${m.padEnd(width + 2)}${this.modes[m].desc}\n`;
+                else
+                    lessRelevant += `    ${m.padEnd(width + 2)}${this.modes[m].desc}\n`;
             });
-            return result;
+            if (lessRelevant !== "")
+                result +=
+                    "\nActions that are probably less relevant:\n\n" + lessRelevant;
+            return result + this.contextHelp.toString();
         }
     }
 }

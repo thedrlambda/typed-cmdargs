@@ -1,9 +1,15 @@
 import * as Mocha from "mocha";
 import assert from "assert";
-import { Command, ArgumentParser, NoHelp } from "../index";
+import {
+  Command,
+  ArgumentParser,
+  NoHelp,
+  NoContextHelp,
+  ContextHelpText,
+} from "../index";
 
 Mocha.describe("Empty", () => {
-  let params = new ArgumentParser(new NoHelp());
+  let params = new ArgumentParser(new NoHelp(), new NoContextHelp());
 
   it("Print modes", () => {
     assert.strictEqual(
@@ -23,7 +29,7 @@ class HelpMock<T> extends DummyCommand {
 }
 
 Mocha.describe("Simple", () => {
-  let params = new ArgumentParser(new NoHelp());
+  let params = new ArgumentParser(new NoHelp(), new NoContextHelp());
   params.push("help", {
     desc: "Prints help",
     arg: "command",
@@ -34,7 +40,7 @@ Mocha.describe("Simple", () => {
   it("Print modes", () => {
     assert.strictEqual(
       params.helpString(),
-      "Specify which action you want help with:\n\n\thelp  Prints help\n"
+      "Specify which action you want help with:\n\n    help  Prints help\n"
     );
   });
 
@@ -60,7 +66,7 @@ class RepoMock extends DummyCommand {
 }
 
 Mocha.describe("Repo", () => {
-  let params = new ArgumentParser(new NoHelp());
+  let params = new ArgumentParser(new NoHelp(), new NoContextHelp());
   params.push("repo", {
     desc: "Setup a new repository",
     arg: "name",
@@ -92,7 +98,7 @@ Mocha.describe("Repo", () => {
     let res = params.helpString();
     assert.strictEqual(
       res,
-      `Specify which action you want help with:\n\n\trepo  Setup a new repository\n`
+      `Specify which action you want help with:\n\n    repo  Setup a new repository\n`
     );
   });
 
@@ -220,7 +226,7 @@ Mocha.describe("Repo", () => {
 });
 
 Mocha.describe("Required param", () => {
-  let params = new ArgumentParser(new NoHelp());
+  let params = new ArgumentParser(new NoHelp(), new NoContextHelp());
   params.push("key", {
     desc: "key-value",
     arg: "key",
@@ -242,7 +248,7 @@ Mocha.describe("Required param", () => {
   it("Print modes", () => {
     assert.strictEqual(
       params.helpString(),
-      "Specify which action you want help with:\n\n\tkey  key-value\n"
+      "Specify which action you want help with:\n\n    key  key-value\n"
     );
   });
 
@@ -276,6 +282,44 @@ Mocha.describe("Required param", () => {
     assert.throws(
       () => params.parse(["key", "thekey", "-v"]),
       /^Missing required arguments: value$/
+    );
+  });
+});
+
+class MockContextHelp implements ContextHelpText {
+  toString() {
+    return `\nYou're doing "great"\n`;
+  }
+}
+
+Mocha.describe("General help", () => {
+  let params = new ArgumentParser(new NoHelp(), new MockContextHelp());
+  params.push("b", {
+    desc: "B",
+    construct: (act, params: {}) => new DummyCommand(),
+    flags: {},
+  });
+  params.push("d", {
+    desc: "D",
+    construct: (act, params: {}) => new DummyCommand(),
+    flags: {},
+    isRelevant: () => false,
+  });
+  params.push("c", {
+    desc: "C",
+    construct: (act, params: {}) => new DummyCommand(),
+    flags: {},
+  });
+  params.push("a", {
+    desc: "A",
+    construct: (act, params: {}) => new DummyCommand(),
+    flags: {},
+  });
+
+  it("Print alphabetical (and relevant)", () => {
+    assert.strictEqual(
+      params.helpString(),
+      'Specify which action you want help with:\n\n    a  A\n    b  B\n    c  C\n\nActions that are probably less relevant:\n\n    d  D\n\nYou\'re doing "great"\n'
     );
   });
 });

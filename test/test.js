@@ -30,7 +30,7 @@ const Mocha = __importStar(require("mocha"));
 const assert_1 = __importDefault(require("assert"));
 const index_1 = require("../index");
 Mocha.describe("Empty", () => {
-    let params = new index_1.ArgumentParser(new index_1.NoHelp());
+    let params = new index_1.ArgumentParser(new index_1.NoHelp(), new index_1.NoContextHelp());
     it("Print modes", () => {
         assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n");
     });
@@ -46,7 +46,7 @@ class HelpMock extends DummyCommand {
     }
 }
 Mocha.describe("Simple", () => {
-    let params = new index_1.ArgumentParser(new index_1.NoHelp());
+    let params = new index_1.ArgumentParser(new index_1.NoHelp(), new index_1.NoContextHelp());
     params.push("help", {
         desc: "Prints help",
         arg: "command",
@@ -54,7 +54,7 @@ Mocha.describe("Simple", () => {
         flags: {},
     });
     it("Print modes", () => {
-        assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n\thelp  Prints help\n");
+        assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n    help  Prints help\n");
     });
     it("Print help for 'help'", () => {
         assert_1.default.strictEqual(params.helpString("help"), "Usage: help <command>\nPrints help\n\n");
@@ -68,7 +68,7 @@ class RepoMock extends DummyCommand {
     }
 }
 Mocha.describe("Repo", () => {
-    let params = new index_1.ArgumentParser(new index_1.NoHelp());
+    let params = new index_1.ArgumentParser(new index_1.NoHelp(), new index_1.NoContextHelp());
     params.push("repo", {
         desc: "Setup a new repository",
         arg: "name",
@@ -97,7 +97,7 @@ Mocha.describe("Repo", () => {
     });
     it("Help string", () => {
         let res = params.helpString();
-        assert_1.default.strictEqual(res, `Specify which action you want help with:\n\n\trepo  Setup a new repository\n`);
+        assert_1.default.strictEqual(res, `Specify which action you want help with:\n\n    repo  Setup a new repository\n`);
     });
     it("Print help for 'repo'", () => {
         assert_1.default.strictEqual(params.helpString("repo"), "Usage: repo [--private] [--ignore <language>] [--license <license>] <name>\n" +
@@ -207,7 +207,7 @@ Mocha.describe("Repo", () => {
     });
 });
 Mocha.describe("Required param", () => {
-    let params = new index_1.ArgumentParser(new index_1.NoHelp());
+    let params = new index_1.ArgumentParser(new index_1.NoHelp(), new index_1.NoContextHelp());
     params.push("key", {
         desc: "key-value",
         arg: "key",
@@ -225,7 +225,7 @@ Mocha.describe("Required param", () => {
         },
     });
     it("Print modes", () => {
-        assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n\tkey  key-value\n");
+        assert_1.default.strictEqual(params.helpString(), "Specify which action you want help with:\n\n    key  key-value\n");
     });
     it("Print help for 'key'", () => {
         assert_1.default.strictEqual(params.helpString("key"), "Usage: key --val <value> [--optional] <key>\n" +
@@ -244,5 +244,37 @@ Mocha.describe("Required param", () => {
     });
     it("Missing 'value'", () => {
         assert_1.default.throws(() => params.parse(["key", "thekey", "-v"]), /^Missing required arguments: value$/);
+    });
+});
+class MockContextHelp {
+    toString() {
+        return `\nYou're doing "great"\n`;
+    }
+}
+Mocha.describe("General help", () => {
+    let params = new index_1.ArgumentParser(new index_1.NoHelp(), new MockContextHelp());
+    params.push("b", {
+        desc: "B",
+        construct: (act, params) => new DummyCommand(),
+        flags: {},
+    });
+    params.push("d", {
+        desc: "D",
+        construct: (act, params) => new DummyCommand(),
+        flags: {},
+        isRelevant: () => false,
+    });
+    params.push("c", {
+        desc: "C",
+        construct: (act, params) => new DummyCommand(),
+        flags: {},
+    });
+    params.push("a", {
+        desc: "A",
+        construct: (act, params) => new DummyCommand(),
+        flags: {},
+    });
+    it("Print alphabetical (and relevant)", () => {
+        assert_1.default.strictEqual(params.helpString(), 'Specify which action you want help with:\n\n    a  A\n    b  B\n    c  C\n\nActions that are probably less relevant:\n\n    d  D\n\nYou\'re doing "great"\n');
     });
 });
