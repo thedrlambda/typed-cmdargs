@@ -4,6 +4,7 @@ export interface Command {
 
 type t<T, A> = {
   desc?: string;
+  example?: string;
   arg?: A;
   construct: (arg: A, params: T) => Command;
   isRelevant?: () => boolean;
@@ -91,10 +92,20 @@ export class ArgumentParser {
             if (out.length > 0) out += ", ";
             out += k;
           });
-          throw `Missing required arguments: ${out}`;
+          throw (
+            `Missing required arguments: ${out}` +
+            (mode.example !== undefined
+              ? `\nExample usage: ${mode.example}`
+              : "")
+          );
         }
         if (arg === undefined && mode.arg !== undefined)
-          throw `Missing required arguments: ${mode.arg}`;
+          throw (
+            `Missing required arguments: ${mode.arg}` +
+            (mode.example !== undefined
+              ? `\nExample usage: ${mode.example}`
+              : "")
+          );
         current.push(mode.construct(arg, result));
         mode = this.modes[strings[i]];
         args = mode.flags;
@@ -112,7 +123,12 @@ export class ArgumentParser {
           if (k === "help") {
             throw this.helpArgument.help(command);
           } else {
-            throw `Unknown argument: ${k}`;
+            throw (
+              `Unknown argument: ${k}` +
+              (mode.example !== undefined
+                ? `\nExample usage: ${mode.example}`
+                : "")
+            );
           }
         } else {
           let argName = args[k].arg;
@@ -149,10 +165,16 @@ export class ArgumentParser {
         if (out.length > 0) out += ", ";
         out += k;
       });
-      throw `Missing required arguments: ${out}`;
+      throw (
+        `Missing required arguments: ${out}` +
+        (mode.example !== undefined ? `\nExample usage: ${mode.example}` : "")
+      );
     }
     if (arg === undefined && mode.arg !== undefined)
-      throw `Missing required arguments: ${mode.arg}`;
+      throw (
+        `Missing required arguments: ${mode.arg}` +
+        (mode.example !== undefined ? `\nExample usage: ${mode.example}` : "")
+      );
     current.push(mode.construct(arg, result));
     return current;
   }
@@ -178,6 +200,7 @@ export class ArgumentParser {
       result += "\n";
       // Description part
       if (cmd.desc) result += cmd.desc + "\n";
+      if (cmd.example) result += `\nExample: ` + cmd.example + "\n";
       result += "\n";
       // Arguments part
       let width = maxKeyWidth(options);

@@ -323,3 +323,25 @@ Mocha.describe("General help", () => {
     );
   });
 });
+
+Mocha.describe("Example", () => {
+  let params = new ArgumentParser(new NoHelp(), new MockContextHelp());
+  params.push("a", {
+    desc: "A",
+    construct: (act, params: {}) => new DummyCommand(),
+    flags: {},
+    example: "a",
+  });
+  params.push("b", {
+    construct: (act, params: {}) => new DummyCommand(),
+    flags: {},
+    example: "b",
+  });
+
+  it("A example", () => {
+    assert.strictEqual(params.helpString("a"), "Usage: a\nA\n\nExample: a\n\n");
+  });
+  it("B example", () => {
+    assert.strictEqual(params.helpString("b"), "Usage: b\n\nExample: b\n\n");
+  });
+});

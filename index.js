@@ -57,10 +57,16 @@ class ArgumentParser {
                             out += ", ";
                         out += k;
                     });
-                    throw `Missing required arguments: ${out}`;
+                    throw (`Missing required arguments: ${out}` +
+                        (mode.example !== undefined
+                            ? `\nExample usage: ${mode.example}`
+                            : ""));
                 }
                 if (arg === undefined && mode.arg !== undefined)
-                    throw `Missing required arguments: ${mode.arg}`;
+                    throw (`Missing required arguments: ${mode.arg}` +
+                        (mode.example !== undefined
+                            ? `\nExample usage: ${mode.example}`
+                            : ""));
                 current.push(mode.construct(arg, result));
                 mode = this.modes[strings[i]];
                 args = mode.flags;
@@ -82,7 +88,10 @@ class ArgumentParser {
                         throw this.helpArgument.help(command);
                     }
                     else {
-                        throw `Unknown argument: ${k}`;
+                        throw (`Unknown argument: ${k}` +
+                            (mode.example !== undefined
+                                ? `\nExample usage: ${mode.example}`
+                                : ""));
                     }
                 }
                 else {
@@ -129,10 +138,12 @@ class ArgumentParser {
                     out += ", ";
                 out += k;
             });
-            throw `Missing required arguments: ${out}`;
+            throw (`Missing required arguments: ${out}` +
+                (mode.example !== undefined ? `\nExample usage: ${mode.example}` : ""));
         }
         if (arg === undefined && mode.arg !== undefined)
-            throw `Missing required arguments: ${mode.arg}`;
+            throw (`Missing required arguments: ${mode.arg}` +
+                (mode.example !== undefined ? `\nExample usage: ${mode.example}` : ""));
         current.push(mode.construct(arg, result));
         return current;
     }
@@ -157,6 +168,8 @@ class ArgumentParser {
             // Description part
             if (cmd.desc)
                 result += cmd.desc + "\n";
+            if (cmd.example)
+                result += `\nExample: ` + cmd.example + "\n";
             result += "\n";
             // Arguments part
             let width = maxKeyWidth(options);

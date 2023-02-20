@@ -278,3 +278,23 @@ Mocha.describe("General help", () => {
         assert_1.default.strictEqual(params.helpString(), 'Specify which action you want help with:\n\n    a  A\n    b  B\n    c  C\n\nActions that are probably less relevant:\n\n    d  D\n\nYou\'re doing "great"\n');
     });
 });
+Mocha.describe("Example", () => {
+    let params = new index_1.ArgumentParser(new index_1.NoHelp(), new MockContextHelp());
+    params.push("a", {
+        desc: "A",
+        construct: (act, params) => new DummyCommand(),
+        flags: {},
+        example: "a",
+    });
+    params.push("b", {
+        construct: (act, params) => new DummyCommand(),
+        flags: {},
+        example: "b",
+    });
+    it("A example", () => {
+        assert_1.default.strictEqual(params.helpString("a"), "Usage: a\nA\n\nExample: a\n\n");
+    });
+    it("B example", () => {
+        assert_1.default.strictEqual(params.helpString("b"), "Usage: b\n\nExample: b\n\n");
+    });
+});
