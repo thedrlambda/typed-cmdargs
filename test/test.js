@@ -298,3 +298,27 @@ Mocha.describe("Example", () => {
         assert_1.default.strictEqual(params.helpString("b"), "Usage: b\n\nExample: b\n\n");
     });
 });
+Mocha.describe("Throws unknown exceptions", () => {
+    let params = new index_1.ArgumentParser(new index_1.NoHelp(), new MockContextHelp());
+    params.push("a", {
+        desc: "A",
+        construct: (act, params) => new DummyCommand(),
+        flags: {
+            clong: {
+                short: "c",
+                defaultValue: "",
+                overrideValue: (s) => s,
+            },
+        },
+        example: "a",
+    });
+    it("Unknown mode", () => {
+        assert_1.default.throws(() => params.parse(["b"]), /^Unknown command: b$/);
+    });
+    it("Unknown long argument", () => {
+        assert_1.default.throws(() => params.parse(["a", "--b"]), /^Unknown argument: b\nExample usage: a$/);
+    });
+    it("Unknown short argument", () => {
+        assert_1.default.throws(() => params.parse(["a", "-b"]), /^Unknown argument: b\nExample usage: a$/);
+    });
+});

@@ -73,7 +73,7 @@ export class ArgumentParser {
     let command = strings[0];
     let mode = this.modes[command];
     if (mode === undefined) {
-      throw `Unknown command '${command}'.`;
+      throw `Unknown command: ${command}`;
     }
     let args = mode.flags;
     let result: { [k: string]: any } = {};
@@ -142,8 +142,10 @@ export class ArgumentParser {
       } else if (p.startsWith("-")) {
         let ps = p.split("");
         for (let j = 1; j < ps.length; j++) {
+          let found = false;
           Object.keys(args).forEach((k: string) => {
             if (ps[j] === args[k].short) {
+              found = true;
               required.delete(k);
               let argName = args[k].arg;
               if (argName !== undefined) {
@@ -154,6 +156,14 @@ export class ArgumentParser {
               }
             }
           });
+          if (!found) {
+            throw (
+              `Unknown argument: ${ps[j]}` +
+              (mode.example !== undefined
+                ? `\nExample usage: ${mode.example}`
+                : "")
+            );
+          }
         }
       } else if (p.length > 0) {
         arg = strings[i];

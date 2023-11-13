@@ -345,3 +345,35 @@ Mocha.describe("Example", () => {
     assert.strictEqual(params.helpString("b"), "Usage: b\n\nExample: b\n\n");
   });
 });
+
+Mocha.describe("Throws unknown exceptions", () => {
+  let params = new ArgumentParser(new NoHelp(), new MockContextHelp());
+  params.push("a", {
+    desc: "A",
+    construct: (act, params: {}) => new DummyCommand(),
+    flags: {
+      clong: {
+        short: "c",
+        defaultValue: "",
+        overrideValue: (s: string) => s,
+      },
+    },
+    example: "a",
+  });
+
+  it("Unknown mode", () => {
+    assert.throws(() => params.parse(["b"]), /^Unknown command: b$/);
+  });
+  it("Unknown long argument", () => {
+    assert.throws(
+      () => params.parse(["a", "--b"]),
+      /^Unknown argument: b\nExample usage: a$/
+    );
+  });
+  it("Unknown short argument", () => {
+    assert.throws(
+      () => params.parse(["a", "-b"]),
+      /^Unknown argument: b\nExample usage: a$/
+    );
+  });
+});
