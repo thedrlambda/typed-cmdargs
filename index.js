@@ -135,7 +135,7 @@ class ArgumentParser {
                     }
                 }
             }
-            else if (p.length > 0) {
+            else {
                 arg = strings[i];
             }
         }
